@@ -16,3 +16,5 @@ By integrating as a live assistant, this solution democratizes access to referee
 - [Testing guide](./docs/TESTING.md)
 - [Contributing guide](CONTRIBUTING.md)
 - [Usage guide](./docs/USAGE.md)
+
+[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/RefereeAI/referai)
