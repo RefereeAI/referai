@@ -12,7 +12,6 @@ dnspython==2.7.0
 ecdsa==0.19.1
 email_validator==2.2.0
 fastapi==0.115.12
-h11==0.16.0
 filelock==3.18.0
 fsspec==2025.3.2
 fvcore==0.1.5.post20221221
