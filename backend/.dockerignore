@@ -1,0 +1,11 @@
+pycache/
+*.pyc
+*.pyo
+*.pyd
+*.db
+.vscode/
+.git/
+.gitignore
+tests/
+node_modules/
+*.log
