@@ -13,4 +13,4 @@ RUN pnpm run build
 
 EXPOSE 3000
 
-CMD ["pnpx", "serve", "-s", "build", "-l", "3000"]
+CMD ["pnpx", "serve", "-s", "dist", "-l", "3000"]
