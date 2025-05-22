@@ -4,7 +4,7 @@ from app.auth.routes import router as auth_router
 from app.action.routes import router as action_router
 from app.predict.routes import router as predict_router
 from fastapi.middleware.cors import CORSMiddleware
-from app.models.predictor import load_models
+from app.models.predictor import load_models,load_severity_models
 import os
 
 # Models
@@ -38,7 +38,7 @@ def lifespan(app: FastAPI):
     FOUL_MODELS = load_models(os.path.join(os.path.dirname(__file__), "app/models/foul"))
     if len(FOUL_MODELS) != 3:
         raise RuntimeError("3 foul models were expected.")
-    SEVERITY_MODELS = load_models(os.path.join(os.path.dirname(__file__), "app/models/severity"))
+    SEVERITY_MODELS = load_severity_models(os.path.join(os.path.dirname(__file__), "app/models/severity"))
     if len(SEVERITY_MODELS) != 3:
         raise RuntimeError("3 severity models were expected.")
     print("Models loaded successfully.")

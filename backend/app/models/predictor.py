@@ -14,17 +14,39 @@ def normalize_frame(frame: np.ndarray) -> np.ndarray:
     std = np.array([0.225, 0.225, 0.225]).reshape((3, 1, 1))
     return (frame - mean) / std
 
-def load_models(model_dir: str) -> list[Any]:
-    """Load all .onnx models from a folder."""
-    models = []
+def load_models(model_dir: str):
+    """Load all .onnx models from a folder into a dictionary."""
+    models = {}
     for file in os.listdir(model_dir):
         if file.endswith(".onnx"):
             path = os.path.join(model_dir, file)
-            models.append(ort.InferenceSession(path))
+            # Extract model type from filename (e.g., 'slowfast' from 'modelo_xgb_slowfast.onnx')
+            model_type = file.replace("modelo_xgb_", "").replace(".onnx", "")
+            if model_type in ["mvit", "x3d", "slowfast"]:
+                models[model_type] = ort.InferenceSession(path)
+            else:
+                print(f"Warning: Unknown model type in file {file}, skipping.")
+
+    return models
+
+def load_severity_models(model_dir: str):
+    """Load severity ONNX models into a dictionary by type."""
+    models = {}
+    for file in os.listdir(model_dir):
+        if file.endswith(".onnx") and file.startswith("modelo_xgboost_severity_"):
+            path = os.path.join(model_dir, file)
+
+            # Extraer tipo del modelo (mvit, x3d, slowfast)
+            model_type = file.replace("modelo_xgboost_severity_", "").replace(".onnx", "")
+            if model_type in ["mvit", "x3d", "slowfast"]:
+                models[model_type] = ort.InferenceSession(path)
+            else:
+                print(f"Warning: Unknown severity model type in file {file}, skipping.")
+
     return models
 
 FOUL_MODELS = load_models(os.path.join(os.path.dirname(__file__), "foul"))
-SEVERITY_MODELS = load_models(os.path.join(os.path.dirname(__file__), "severity"))
+SEVERITY_MODELS = load_severity_models(os.path.join(os.path.dirname(__file__), "severity"))
 
 def load_x3d_model():
     return ort.InferenceSession(os.path.join(os.path.dirname(__file__), "x3d.onnx"))
@@ -180,11 +202,12 @@ def predict(video_paths: list) -> dict:
         except Exception as e:
             print(f"Error while processing video {video_path}: {e}")
 
-    # Calculate mean features for each model
-    action_features = []
-    action_features.append(np.mean(action_clips_mvit, axis=0)) 
-    action_features.append(np.mean(action_clips_x3d, axis=0))
-    action_features.append(np.mean(action_clips_slowfast, axis=0))
+    
+    action_features = {
+    "mvit": np.mean(action_clips_mvit, axis=0),
+    "x3d": np.mean(action_clips_x3d, axis=0),
+    "slowfast": np.mean(action_clips_slowfast, axis=0)
+    }
 
     print("Action features shape: ", len(action_features))
 
@@ -194,16 +217,21 @@ def predict(video_paths: list) -> dict:
     
     foul_preds = []
     foul_model_results = []
-    for i, model in enumerate(FOUL_MODELS):
-        feature = action_features[i]
+    for model_type in ["mvit", "x3d", "slowfast"]:
+        model = FOUL_MODELS.get(model_type)
+        if model is None:
+            print(f"No foul model found for {model_type}")
+            continue
+        feature = action_features[model_type]
         input_name = model.get_inputs()[0].name
         output = model.run(None, {input_name: feature[np.newaxis, :].astype(np.float32)})
         probabilities = output[1]  # We assume the ONNX model returns softmax
         prediction = int(np.argmax(probabilities))
-        print(f"Model {i+1} foul probabilities: {probabilities}")
+        print(prediction)
+        print(f"{model_type} foul probabilities: {probabilities}")
         foul_preds.append(prediction)
         foul_model_results.append({
-            "model": f"Foul Model {i+1}",
+            "model": f"Foul Model {model_type}",
             "prediction": prediction
         })
 
@@ -216,19 +244,23 @@ def predict(video_paths: list) -> dict:
     if foul_pct > no_foul_pct:
         severity_preds = []
         severity_model_results = []
-        for i, model in enumerate(SEVERITY_MODELS):
-            feature = action_features[i]
+
+        for model_type in ["mvit", "x3d", "slowfast"]:
+            model = SEVERITY_MODELS.get(model_type)
+            if model is None:
+                print(f"No severity model found for {model_type}")
+                continue
+            feature = action_features[model_type]
             input_name = model.get_inputs()[0].name
             output = model.run(None, {input_name: feature[np.newaxis, :].astype(np.float32)})
             probabilities = output[1]  # We assume the ONNX model returns softmax
             prediction = int(np.argmax(probabilities))
-            print(f"Model {i+1} severity probabilities: {probabilities}")
+            print(f"{model_type} severity probabilities: {probabilities}")
             severity_preds.append(prediction)
             severity_model_results.append({
-                "model": f"Severity Model {i+1}",
+                "model": f"Severity Model {model_type}",
                 "prediction": prediction
             })
-
         # Calculate the average of the severity predictions
         total_severity_preds = len(severity_preds)
         red_card_pct = (severity_preds.count(1)/total_severity_preds) * 100
@@ -238,7 +270,7 @@ def predict(video_paths: list) -> dict:
         red_card_pct = 0
         yellow_card_pct = 0
         no_card_pct = 100
-
+        severity_model_results = []
     # Change the prediction to int
     foul_model_results = [
         {
