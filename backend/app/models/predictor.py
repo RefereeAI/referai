@@ -3,6 +3,7 @@ import numpy as np
 import onnxruntime as ort
 import cv2
 from typing import Any
+from fastapi import Request
 
 # Device configuration (CPU, since torch.cuda is not used)
 device = "cpu"
@@ -35,8 +36,6 @@ def load_severity_models(model_dir: str):
     for file in os.listdir(model_dir):
         if file.endswith(".onnx") and file.startswith("modelo_xgboost_severity_"):
             path = os.path.join(model_dir, file)
-
-            # Extraer tipo del modelo (mvit, x3d, slowfast)
             model_type = file.replace("modelo_xgboost_severity_", "").replace(".onnx", "")
             if model_type in ["mvit", "x3d", "slowfast"]:
                 models[model_type] = ort.InferenceSession(path)
@@ -44,9 +43,6 @@ def load_severity_models(model_dir: str):
                 print(f"Warning: Unknown severity model type in file {file}, skipping.")
 
     return models
-
-FOUL_MODELS = load_models(os.path.join(os.path.dirname(__file__), "foul"))
-SEVERITY_MODELS = load_severity_models(os.path.join(os.path.dirname(__file__), "severity"))
 
 def load_x3d_model():
     return ort.InferenceSession(os.path.join(os.path.dirname(__file__), "x3d.onnx"))
@@ -178,7 +174,11 @@ def extract_features_x3d(video_path, model):
     outputs = model.run(None, {input_name: frames})
     return np.array(outputs[0]).squeeze()
 
-def predict(video_paths: list) -> dict:
+def predict(video_paths: list,request: Request) -> dict:
+    
+    foul_models = request.app.state.foul_models
+    severity_models = request.app.state.severity_models
+    
     # Load feature extraction models
     mvit = load_mvit_model()
     x3d = load_x3d_model()
@@ -218,7 +218,7 @@ def predict(video_paths: list) -> dict:
     foul_preds = []
     foul_model_results = []
     for model_type in ["mvit", "x3d", "slowfast"]:
-        model = FOUL_MODELS.get(model_type)
+        model = foul_models.get(model_type)
         if model is None:
             print(f"No foul model found for {model_type}")
             continue
@@ -246,7 +246,7 @@ def predict(video_paths: list) -> dict:
         severity_model_results = []
 
         for model_type in ["mvit", "x3d", "slowfast"]:
-            model = SEVERITY_MODELS.get(model_type)
+            model = severity_models.get(model_type)
             if model is None:
                 print(f"No severity model found for {model_type}")
                 continue

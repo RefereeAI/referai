@@ -1,8 +1,9 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
 from pydantic import BaseModel
 from typing import List
 from sqlalchemy.orm import Session
 from app.db.models import Prediction, User, Action, Clip
+
 
 from app.db.database import get_db
 from app.auth.jwt_utils import get_current_user
@@ -31,7 +32,7 @@ class PredictResponse(BaseModel):
 
 
 @router.post("/predict/{action_id}", response_model=PredictResponse)
-async def predict_endpoint(action_id: int, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+async def predict_endpoint(action_id: int,request: Request, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     # Verify the action exists and belongs to the current user
     action = db.query(Action).filter(Action.id == action_id, Action.user_id == current_user.id).first()
     if not action:
@@ -57,7 +58,7 @@ async def predict_endpoint(action_id: int, db: Session = Depends(get_db), curren
                 video_paths.append(temp_video.name)
         
         # Prediction call
-        prediction_results = predict(video_paths)
+        prediction_results = predict(video_paths,request)
 
         # Save prediction to the database
         prediction = Prediction(
