@@ -197,13 +197,36 @@ export default function MainPage() {
     };
   }, []);
 
+  useEffect(() => {
+    const handleEnded = () => {
+      const allEnded = videoRefs.current.every(
+        (video) => video.ended || video.currentTime === video.duration
+      );
+      if (allEnded) {
+        setIsPlaying(false);
+        stopAnimation();
+      }
+    };
+
+    videoRefs.current.forEach((video) => {
+      video.addEventListener("ended", handleEnded);
+    });
+
+    return () => {
+      videoRefs.current.forEach((video) => {
+        video.removeEventListener("ended", handleEnded);
+      });
+    };
+  }, [selectedVideos]);
+
+
   return (
     <>
       <Navbar />
       <div className="flex flex-col md:flex-row h-screen">
         {/* Video Grid Section */}
         <div
-          className={`flex-[3] grid gap-2 p-2 bg-white dark:bg-slate-800 ${selectedVideos.length === 2 ? "grid-cols-1 grid-rows-2" : "grid-cols-2 grid-rows-2"
+          className={`flex-[3] grid gap-2 p-2 bg-slate-800 ${selectedVideos.length === 2 ? "grid-cols-1 grid-rows-2" : "grid-cols-2 grid-rows-2"
             }`}
         >
           {isLoading ? (
@@ -238,7 +261,7 @@ export default function MainPage() {
         </div>
 
         {/* Side Panel */}
-        <div className="flex-[1] p-4 h-full bg-white dark:bg-slate-900 overflow-auto">
+        <div className="flex-[1] p-4 h-full bg-slate-900 overflow-auto">
           {/* Controls */}
           <div className="grid grid-cols-3 mb-4 gap-2">
             {/* Range Input */}

@@ -48,19 +48,19 @@ export default function RegisterPage() {
         <h1 className="text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-green-600 to-blue-500 mb-4 animate-fade-in">
           Create an Account
         </h1>
-        <p className="text-gray-600 dark:text-gray-300 text-lg">
+        <p className="text-gray-300 text-lg">
           Join us and start your journey today.
         </p>
       </div>
 
       {/* Register Form */}
-      <div className="flex basis-1/3 mr-6 max-w-sm bg-white dark:bg-slate-800 p-8 rounded-xl shadow-lg dark:shadow-none">
+      <div className="flex basis-1/3 mr-6 max-w-sm bg-slate-800 p-8 rounded-xl shadow-lg">
         <form
           onSubmit={handleSubmit}
           className="flex flex-col gap-4 max-w-sm mx-auto"
         >
           <div>
-            <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">
+            <label htmlFor="email" className="block text-sm font-medium text-gray-200 mb-1">
               Email
             </label>
             <input
@@ -70,12 +70,12 @@ export default function RegisterPage() {
               onChange={(e) => setEmail(e.target.value)}
               placeholder="you@example.com"
               required
-              className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-slate-700 dark:text-white"
+              className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-slate-700 text-white"
             />
           </div>
 
           <div>
-            <label htmlFor="password" className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">
+            <label htmlFor="password" className="block text-sm font-medium text-gray-200 mb-1">
               Password
             </label>
             <input
@@ -85,12 +85,12 @@ export default function RegisterPage() {
               onChange={(e) => setPassword(e.target.value)}
               placeholder="••••••••"
               required
-              className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-slate-700 dark:text-white"
+              className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-slate-700 text-white"
             />
           </div>
 
           <div>
-            <label htmlFor="confirm-password" className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">
+            <label htmlFor="confirm-password" className="block text-sm font-medium text-gray-200 mb-1">
               Confirm Password
             </label>
             <input
@@ -100,7 +100,7 @@ export default function RegisterPage() {
               onChange={(e) => setConfirmPassword(e.target.value)}
               placeholder="••••••••"
               required
-              className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-slate-700 dark:text-white"
+              className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-slate-700 text-white"
             />
           </div>
 
@@ -121,7 +121,7 @@ export default function RegisterPage() {
             {loading ? "Creating account..." : "Create Account"}
           </button>
 
-          <p className="text-sm text-gray-500 dark:text-gray-400 text-center mt-4">
+          <p className="text-sm text-gray-400 text-center mt-4">
             Already have an account?{" "}
             <a href="/login" className="text-green-600 hover:underline">
               Log in
