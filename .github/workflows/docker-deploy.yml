@@ -29,12 +29,17 @@ jobs:
 
       - name: Install dependencies
         run: |
+          cd backend
+          python -m venv venv
+          source venv/bin/activate
           python -m pip install --upgrade pip
           pip install -r requirements.txt
           pip install pytest pytest-asyncio pytest-xdist
 
       - name: Run tests in parallel with pytest
         run: |
+          cd backend
+          source venv/bin/activate
           pytest -n auto --maxfail=2 --disable-warnings
 
       - name: Set up Docker Buildx
