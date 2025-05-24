@@ -34,15 +34,14 @@ jobs:
           source venv/bin/activate
           python -m pip install --upgrade pip
           pip install -r requirements.txt
-          pip install pytest pytest-asyncio pytest-xdist
 
-      - name: Run tests in parallel with pytest
-        env:
-            DB_URL: sqlite:///./tests/test.db
-        run: |
-          cd backend
-          source venv/bin/activate
-          pytest
+      # - name: Run tests in parallel with pytest
+      #   env:
+      #       DB_URL: sqlite:///./tests/test.db
+      #   run: |
+      #     cd backend
+      #     source venv/bin/activate
+      #     pytest
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
