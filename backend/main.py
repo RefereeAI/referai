@@ -24,10 +24,6 @@ def print_ascii_art():
     print(logo)
 
 def lifespan(app: FastAPI):
-    if os.environ.get("ENV") == "test":
-        yield
-        return
-
     print_ascii_art()
 
     foul_models = load_models(os.path.join(os.path.dirname(__file__), "app/models/foul"))
