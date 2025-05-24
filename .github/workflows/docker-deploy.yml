@@ -37,6 +37,8 @@ jobs:
           pip install pytest pytest-asyncio pytest-xdist
 
       - name: Run tests in parallel with pytest
+        env:
+            DB_URL: sqlite:///./tests/test.db
         run: |
           cd backend
           source venv/bin/activate
