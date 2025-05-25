@@ -35,7 +35,7 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Run tests in parallel with pytest
+      - name: Run tests with pytest
         env:
             DB_URL: sqlite:///./tests/test.db
         run: |
