@@ -2,7 +2,7 @@ version: "3.9"
 
 services:
   backend:
-    build: ./backend
+    image: javierrc8/referai:latest
     container_name: referai-backend
     ports:
       - "8000:8000"
@@ -12,7 +12,7 @@ services:
       - db
 
   frontend:
-    build: ./frontend
+    image: javierrc8/referai-frontend:latest
     container_name: referai-frontend
     ports:
       - "3000:3000"
