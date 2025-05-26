@@ -81,6 +81,7 @@ jobs:
           file: ./backend/Dockerfile
           push: true
           tags: javierrc8/referai-backend:latest
+          no-cache: true 
 
       - name: Build and push frontend Docker image
         uses: docker/build-push-action@v5
