@@ -96,4 +96,4 @@ jobs:
           push: true
           tags: javierrc8/referai-frontend:latest
           build-args: |
-            VITE_API_URL=${{ secrets.VITE_API_URL }}
+            VITE_API_URL=http://backend:8080
