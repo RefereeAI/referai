@@ -9,6 +9,9 @@ RUN npm install -g pnpm \
 
 COPY . .
 
+ARG VITE_API_URL
+ENV VITE_API_URL=${VITE_API_URL}
+
 RUN pnpm run build
 
 EXPOSE 3000
