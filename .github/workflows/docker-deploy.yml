@@ -11,8 +11,13 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
+      - name: Checkout code with LFS support
         uses: actions/checkout@v4
+        with:
+          lfs: true
+
+      - name: Pull LFS files (e.g., .onnx models)
+        run: git lfs pull
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -37,7 +42,7 @@ jobs:
 
       - name: Run tests with pytest
         env:
-            DB_URL: sqlite:///./tests/test.db
+          DB_URL: sqlite:///./tests/test.db
         run: |
           cd backend
           source venv/bin/activate
@@ -81,7 +86,7 @@ jobs:
           file: ./backend/Dockerfile
           push: true
           tags: javierrc8/referai-backend:latest
-          no-cache: true 
+          no-cache: true
 
       - name: Build and push frontend Docker image
         uses: docker/build-push-action@v5
