@@ -2,17 +2,17 @@ version: "3.9"
 
 services:
   backend:
-    build: ./backend
+    image: javierrc8/referai-backend:latest
     container_name: referai-backend
     ports:
-      - "8000:8000"
+      - "8080:8080"
     environment:
       - DB_URL=${DB_URL}
     depends_on:
       - db
 
   frontend:
-    build: ./frontend
+    image: javierrc8/referai-frontend:latest
     container_name: referai-frontend
     ports:
       - "3000:3000"
