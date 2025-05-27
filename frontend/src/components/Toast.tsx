@@ -13,7 +13,7 @@ const Toast: React.FC<ToastProps> = ({ message, type, onClose }) => {
 
   return (
     <div
-      className={`fixed top-4 right-4 w-80 p-4 rounded-lg shadow-lg text-white ${bgColor} flex items-center space-x-3`}
+      className={`fixed top-4 right-4 w-80 p-4 rounded-lg shadow-lg text-white ${bgColor} flex items-center space-x-3 z-50`}
     >
       <span className="text-xl">{icon}</span>
       <span className="flex-1">{message}</span>

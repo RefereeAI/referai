@@ -1,0 +1,12 @@
+pycache/
+.pytest_cache/
+*.pyc
+*.pyo
+*.pyd
+*.db
+.vscode/
+.git/
+.gitignore
+tests/
+node_modules/
+*.log

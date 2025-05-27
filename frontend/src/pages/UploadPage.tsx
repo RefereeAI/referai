@@ -9,7 +9,7 @@ import Toast from "../components/Toast";
 export default function UploadPage() {
   const { selectedVideos, setSelectedVideos, uploadedFiles, setUploadedFiles } = useSelectedVideos();
   const navigate = useNavigate();
-  const [uploadProgress, setUploadProgress] = useState<number[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
   const [lastAction, setLastAction] = useState<{
     action_id: number;
     clips: { id: number; content: string }[];
@@ -57,6 +57,7 @@ export default function UploadPage() {
   const handleContinue = async () => {
     if (selectedVideos.length >= 2 && selectedVideos.length <= 4) {
       try {
+        setIsLoading(true);
         const token = localStorage.getItem("token");
 
         if (!token || !token.includes(".") || token.split(".").length !== 3) {
@@ -70,23 +71,26 @@ export default function UploadPage() {
         console.error("Upload failed", error);
         setErrorMessage(
           error?.response?.data?.detail ||
-            "An error occurred while uploading your clips. Please try again."
+          "An error occurred while uploading your clips. Please try again."
         );
+      } finally {
+        setIsLoading(false);
       }
     } else {
       setErrorMessage("Please select between 2 and 4 clips to continue.");
     }
   };
 
+
   return (
     <>
       <Navbar />
       <div className="flex flex-col items-center justify-center min-h-screen px-4 py-8">
         {/* Page Titles */}
-        <h1 className="text-3xl font-bold text-gray-800 dark:text-white mb-4">
+        <h1 className="text-3xl font-bold text-white mb-4">
           Clip Selection
         </h1>
-        <h2 className="text-xl font-medium text-gray-700 dark:text-gray-300 mb-8">
+        <h2 className="text-xl font-medium text-gray-300 mb-8">
           Select between 2 and 4 clips to continue
         </h2>
 
@@ -101,11 +105,11 @@ export default function UploadPage() {
 
         <div className="flex flex-col md:flex-row gap-8 w-full max-w-5xl">
           {/* Upload Area */}
-          <div className="flex-1 bg-white dark:bg-slate-800 p-6 rounded-xl shadow-md flex flex-col">
-            <h3 className="text-xl font-semibold text-gray-800 dark:text-white mb-4">
+          <div className="flex-1 bg-slate-800 p-6 rounded-xl shadow-md flex flex-col">
+            <h3 className="text-xl font-semibold text-white mb-4">
               Upload Your Clips
             </h3>
-            <div className="flex-1 flex items-center justify-center border-2 border-dashed border-blue-400 rounded-lg p-6 text-center text-gray-500 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-slate-700 transition">
+            <div className="flex-1 flex items-center justify-center border-2 border-dashed border-blue-400 rounded-lg p-6 text-center text-gray-300 hover:bg-slate-700 transition">
               <input
                 type="file"
                 accept="video/*"
@@ -124,9 +128,8 @@ export default function UploadPage() {
 
           {/* Last Action Preview */}
           <div
-            className={`flex-1 bg-white dark:bg-slate-800 p-6 rounded-xl shadow-md ${
-              lastAction ? "hover:bg-slate-700 cursor-pointer" : "opacity-60"
-            } transition`}
+            className={`flex-1 bg-slate-800 p-6 rounded-xl shadow-md ${lastAction ? "hover:bg-slate-700 cursor-pointer" : "opacity-60"
+              } transition`}
             onClick={() => {
               if (lastAction) {
                 localStorage.setItem("last_action_id", lastAction.action_id.toString());
@@ -134,7 +137,7 @@ export default function UploadPage() {
               }
             }}
           >
-            <h3 className="text-xl font-semibold text-gray-800 dark:text-white mb-4">
+            <h3 className="text-xl font-semibold text-white mb-4">
               Your Last Action
             </h3>
             {lastAction ? (
@@ -142,7 +145,7 @@ export default function UploadPage() {
                 {lastAction.clips.map((clip: any, idx: number) => (
                   <div
                     key={idx}
-                    className="rounded overflow-hidden border border-gray-200 dark:border-gray-700"
+                    className="rounded overflow-hidden border border-gray-700"
                   >
                     <video
                       src={`data:video/mp4;base64,${clip.content}`}
@@ -154,7 +157,7 @@ export default function UploadPage() {
                 ))}
               </div>
             ) : (
-              <p className="text-gray-500 dark:text-gray-300">
+              <p className="text-gray-300">
                 No previous actions found
               </p>
             )}
@@ -164,14 +167,14 @@ export default function UploadPage() {
         {/* Selected Clips */}
         {selectedVideos.length > 0 && (
           <div className="w-full max-w-5xl mt-10">
-            <h3 className="text-xl font-semibold text-gray-800 dark:text-white mb-4">
+            <h3 className="text-xl font-semibold text-white mb-4">
               Selected Clips
             </h3>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               {selectedVideos.map((video, idx) => (
                 <div
                   key={idx}
-                  className="relative group border border-gray-300 dark:border-gray-600 rounded overflow-hidden"
+                  className="relative group border border-gray-600 rounded overflow-hidden"
                 >
                   <video
                     src={video}
@@ -194,16 +197,46 @@ export default function UploadPage() {
 
         {/* Continue Button */}
         <button
-          disabled={selectedVideos.length < 2 || selectedVideos.length > 4}
+          disabled={
+            selectedVideos.length < 2 || selectedVideos.length > 4 || isLoading
+          }
           onClick={handleContinue}
-          className={`mt-10 px-6 py-3 rounded-lg text-white font-semibold transition ${
-            selectedVideos.length >= 2 && selectedVideos.length <= 4
-              ? "bg-green-600 hover:bg-green-700"
-              : "bg-gray-400 cursor-not-allowed"
-          }`}
+          className={`mt-10 px-6 py-3 rounded-lg text-white font-semibold flex items-center justify-center gap-2 transition ${selectedVideos.length >= 2 &&
+            selectedVideos.length <= 4 &&
+            !isLoading
+            ? "bg-green-600 hover:bg-green-700"
+            : "bg-gray-400 cursor-not-allowed"
+            }`}
         >
-          Continue
+          {isLoading ? (
+            <>
+              <svg
+                className="animate-spin h-5 w-5 text-white"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+              >
+                <circle
+                  className="opacity-25"
+                  cx="12"
+                  cy="12"
+                  r="10"
+                  stroke="currentColor"
+                  strokeWidth="4"
+                ></circle>
+                <path
+                  className="opacity-75"
+                  fill="currentColor"
+                  d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+                ></path>
+              </svg>
+              Uploading...
+            </>
+          ) : (
+            "Continue"
+          )}
         </button>
+
       </div>
     </>
   );

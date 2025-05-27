@@ -4,8 +4,9 @@ from app.auth.routes import router as auth_router
 from app.action.routes import router as action_router
 from app.predict.routes import router as predict_router
 from fastapi.middleware.cors import CORSMiddleware
-from app.models.predictor import load_models
+from app.models.predictor import load_models,load_severity_models
 import os
+
 
 # Models
 FOUL_MODELS = None
@@ -23,29 +24,22 @@ def print_ascii_art():
     print(logo)
 
 def lifespan(app: FastAPI):
-    """
-    Lifespan event to load models when the application starts.
-    """
-    if os.environ.get("ENV") == "test":
-        yield
-        return
-    
     print_ascii_art()
-    
-    global FOUL_MODELS, SEVERITY_MODELS
 
-    # STARTUP
-    FOUL_MODELS = load_models(os.path.join(os.path.dirname(__file__), "app/models/foul"))
-    if len(FOUL_MODELS) != 3:
+    foul_models = load_models(os.path.join(os.path.dirname(__file__), "app/models/foul"))
+    if len(foul_models) != 3:
         raise RuntimeError("3 foul models were expected.")
-    SEVERITY_MODELS = load_models(os.path.join(os.path.dirname(__file__), "app/models/severity"))
-    if len(SEVERITY_MODELS) != 3:
+
+    severity_models = load_severity_models(os.path.join(os.path.dirname(__file__), "app/models/severity"))
+    if len(severity_models) != 3:
         raise RuntimeError("3 severity models were expected.")
+
+    app.state.foul_models = foul_models
+    app.state.severity_models = severity_models
+
     print("Models loaded successfully.")
+    yield
 
-    yield  # This will be executed when the app is running
-
-    # SHUTDOWN
     print("Shutting down...")
 
 app = FastAPI(title="Referai API", lifespan=lifespan)

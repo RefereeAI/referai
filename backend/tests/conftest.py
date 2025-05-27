@@ -1,36 +1,34 @@
-import pytest 
-from httpx import AsyncClient
-from httpx import ASGITransport
+import os
+import pytest
+import pytest_asyncio
+from httpx import AsyncClient, ASGITransport
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from sqlalchemy_utils import create_database, database_exists, drop_database
-import pytest_asyncio 
 
 from app.db.database import get_db
 from app.db.models import Base
-
-import os
-os.environ["ENV"] = "test"
-
 from main import app
 
-TEST_DATABASE_URL = "sqlite:///./tests/test.db"
+# Set env vars early
+os.environ["ENV"] = "test"
+os.environ["DB_URL"] = "sqlite:///./tests/test.db"
 
+# Setup DB
+TEST_DATABASE_URL = os.environ["DB_URL"]
 engine = create_engine(TEST_DATABASE_URL, connect_args={"check_same_thread": False})
 TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
-# Create the database and tables
+# Create schema
 @pytest.fixture(scope="session", autouse=True)
 def setup_database():
-    # Create the database if it doesn't exist
-    if database_exists(TEST_DATABASE_URL):
-        drop_database(TEST_DATABASE_URL)
-    else:
-        create_database(TEST_DATABASE_URL)
+    # For SQLite, just remove and recreate the tables
+    if os.path.exists("./tests/test.db"):
+        os.remove("./tests/test.db")
     Base.metadata.create_all(bind=engine)
+    yield
+    engine.dispose()
 
-    yield  # execute tests
-
+# Provide DB session to tests
 @pytest.fixture()
 def db():
     db = TestingSessionLocal()
@@ -39,13 +37,11 @@ def db():
     finally:
         db.close()
 
+# Provide HTTP client with overridden DB
 @pytest_asyncio.fixture()
 async def client(db):
     def override_get_db():
-        try:
-            yield db
-        finally:
-            db.close()
+        yield db
 
     app.dependency_overrides[get_db] = override_get_db
 
