@@ -21,5 +21,6 @@ This system is especially oriented to leagues or competitions that do not have t
 - [Testing guide](./docs/TESTING.md)
 - [Contributing guide](CONTRIBUTING.md)
 - [Usage guide](./docs/USAGE.md)
+- [Deployment guide](./docs/DEPLOYMENT.md)
 
 [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/RefereeAI/referai)
